@@ -1,0 +1,81 @@
+# ==============================================================================
+# Purple Swan Data Profiles
+# ------------------------------------------------------------------------------
+# Each profile defines which data loaders are used for each EntityType.
+# To switch between S3, DB, or hybrid runs, simply change the profile name
+# passed to build_factory_from_profile(profile="s3" | "db" | "hybrid").
+# ==============================================================================
+
+profiles:
+  # ---------------------------------------------------------------------------
+  # All data sources from AWS S3
+  # ---------------------------------------------------------------------------
+  s3:
+    instrument:
+      loader: s3_instruments
+      bucket: purple-swan-prod-data
+      key: instruments/latest.parquet
+
+    portfolio:
+      loader: s3_portfolios
+      bucket: purple-swan-prod-data
+      key: portfolios/latest.parquet
+
+    position:
+      loader: s3_positions
+      bucket: purple-swan-prod-data
+      key: positions/latest.parquet
+
+  # ---------------------------------------------------------------------------
+  # All data sources from a relational database
+  # ---------------------------------------------------------------------------
+  db:
+    instrument:
+      loader: db_instruments
+      dsn: postgresql://user:password@host:5432/riskdb
+      table: instruments
+
+    portfolio:
+      loader: db_portfolios
+      dsn: postgresql://user:password@host:5432/riskdb
+      table: portfolios
+
+    position:
+      loader: db_positions
+      dsn: postgresql://user:password@host:5432/riskdb
+      table: positions
+
+  # ---------------------------------------------------------------------------
+  # Hybrid setup — S3 for instruments, DB for portfolios and positions
+  # ---------------------------------------------------------------------------
+  hybrid:
+    instrument:
+      loader: s3_instruments
+      bucket: purple-swan-prod-data
+      key: instruments/latest.parquet
+
+    portfolio:
+      loader: db_portfolios
+      dsn: postgresql://user:password@host:5432/riskdb
+      table: portfolios
+
+    position:
+      loader: db_positions
+      dsn: postgresql://user:password@host:5432/riskdb
+      table: positions
+
+  # ---------------------------------------------------------------------------
+  # Local testing / offline mode using mock data
+  # ---------------------------------------------------------------------------
+  local:
+    instrument:
+      loader: mock_instruments
+      path: data/mock/instruments.csv
+
+    portfolio:
+      loader: mock_portfolios
+      path: data/mock/portfolios.csv
+
+    position:
+      loader: mock_positions
+      path: data/mock/positions.csv
