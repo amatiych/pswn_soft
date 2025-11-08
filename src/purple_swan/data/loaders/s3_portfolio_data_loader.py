@@ -1,18 +1,17 @@
 import os
 from pandas import read_parquet, concat, DataFrame, read_csv
-from purple_swan.data.models.data_loader import DataLoader
-from purple_swan.data.models.models import Portfolio, EntityType, List, Instrument
+from purple_swan.data.loaders.data_loader import DataLoader
+from purple_swan.data.models.models import Portfolio, EntityType, List
 from purple_swan.core.aws_utils import list_s3_files
 from purple_swan.data.loader_registry import register_loader
+from typing import List,Mapping, Any
 
-
-
-@register_loader("s3_portfolios")
 class S3PortfolioDataLoader(DataLoader[Portfolio]):
 
     def __init__(self, **kwargs):
         env_name = os.environ.get('environment')
-        self.bucket_name = f"pswn-{env_name}"
+        self.bucket_name = kwargs["bucket"]
+        self.key = kwargs["key"]
         self.init_funcs()
 
     def init_funcs(self):
@@ -51,11 +50,27 @@ class S3PortfolioDataLoader(DataLoader[Portfolio]):
             df = DataFrame(assets, columns=["asset", "value"])
             self.write_fun(url, df)
 
+    @classmethod
+    def from_config(cls, cfg: Mapping[str, Any]) -> "S3InstrumentsDataLoader":
+        """
+        Config example (YAML):
 
-
+            instrument:
+              loader: s3_instruments
+              bucket: pawn-{env}
+              key: instruments/latest.parquet
+              region: us-east-1
+        """
+        return cls(
+            bucket=cfg["bucket"],
+            key=cfg["key"],
+            region=cfg.get("region"),
+        )
+@register_loader("s3_portfolios")
 class S3PortfolioDataLoaderParquet (S3PortfolioDataLoader):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
 
 class S3PortfolioDataLoaderCsv (S3PortfolioDataLoader):
     def __init__(self, **kwargs):

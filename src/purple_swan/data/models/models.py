@@ -7,8 +7,6 @@ class EntityType(str, Enum):
     INSTRUMENT = "instrument"
     PORTFOLIO = "portfolio"
 
-T = TypeVar("T")
-
 
 
 @dataclass

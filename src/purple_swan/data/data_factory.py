@@ -1,7 +1,7 @@
 # purple_swan/data/factory.py
 from typing import Dict, Any
 from purple_swan.data.models.models import EntityType
-from purple_swan.data.models.data_loader import DataLoader
+from purple_swan.data.loaders.data_loader import DataLoader
 
 class DataFactory:
     def __init__(self) -> None:

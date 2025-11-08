@@ -1,7 +1,7 @@
 from purple_swan.data.data_factory import DataFactory
-import purple_swan.data.models.s3_portfolio_data_loader as pl
-import purple_swan.data.models.s3_instruments_data_loader as sl
-from purple_swan.data.data_providers.time_series_loader import TimeSeriesProvider, YahooTimeSeriesProvider
+import purple_swan.data.loaders.s3_portfolio_data_loader as pl
+import purple_swan.data.loaders.s3_instruments_data_loader as sl
+from purple_swan.data.data_providers.time_series_loader import YahooTimeSeriesProvider
 
 if __name__ == "__main__":
     factory = DataFactory()

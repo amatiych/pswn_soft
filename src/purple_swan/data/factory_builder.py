@@ -1,16 +1,17 @@
+# purple_swan/data/factory_builder.py
+
 from __future__ import annotations
 
 import os
 from string import Template
 from pathlib import Path
-from typing import Mapping, Any
+
 import yaml
 
 from purple_swan.data.data_factory import DataFactory
 from purple_swan.data.models.models import EntityType
-from purple_swan.data.models.data_loader import DataLoader
+from purple_swan.data.loaders.data_loader import DataLoader
 from purple_swan.data.loader_registry import get_loader_cls
-
 
 DEFAULT_CONFIG_RELATIVE = Path("config") / "data_profiles.yaml"
 ENV_VAR_NAME = "PSWN_CONFIG"
@@ -47,7 +48,10 @@ def resolve_config_path(explicit: str | Path | None = None) -> Path:
     repo_root = _find_repo_root()
     default_path = repo_root / DEFAULT_CONFIG_RELATIVE
     if not default_path.exists():
-        raise FileNotFoundError(f"Default config missing: {default_path}")
+        raise FileNotFoundError(
+            f"Default config missing: {default_path}. "
+            f"Set {ENV_VAR_NAME} or pass config_path explicitly."
+        )
     return default_path
 
 
@@ -62,9 +66,23 @@ def _substitute_env_vars(obj, env_map):
         return obj
 
 
-def build_factory_from_profile(profile: str, config_path: str | Path | None = None, env_name: str | None = None) -> DataFactory:
+def _ensure_loaders_imported() -> None:
+    """
+    Import the loaders package so that all @register_loader decorators run.
+    """
+    # This import triggers the side effects in purple_swan/data/loaders/__init__.py
+    import purple_swan.data.loaders  # noqa: F401
+
+
+def build_factory_from_profile(
+    profile: str,
+    config_path: str | Path | None = None,
+    env_name: str | None = None,
+) -> DataFactory:
+    _ensure_loaders_imported()  # as we had before
+
     cfg_path = resolve_config_path(config_path)
-    with open(cfg_path, "r") as f:
+    with cfg_path.open("r") as f:
         full_cfg = yaml.safe_load(f)
 
     env_name = env_name or os.getenv("PSWN_ENV", "dev")
@@ -79,11 +97,30 @@ def build_factory_from_profile(profile: str, config_path: str | Path | None = No
     resolved_profile = _substitute_env_vars(profile_cfg, env_cfg)
 
     factory = DataFactory()
+
     for entity_name, entity_cfg in resolved_profile.items():
-        entity_type = EntityType[entity_name.upper()]
+        # Still useful for validation, but not passed into from_config
+        try:
+            expected_entity_type = EntityType[entity_name.upper()]
+        except KeyError:
+            raise KeyError(
+                f"Unknown entity '{entity_name}' in profile '{profile}'. "
+                f"Make sure it matches an EntityType member."
+            )
+
         loader_name = entity_cfg["loader"]
         loader_cls = get_loader_cls(loader_name)
-        loader: DataLoader = loader_cls.from_config(entity_type, entity_cfg)
+
+        # 👇 New: from_config takes only cfg
+        loader: DataLoader = loader_cls.from_config(entity_cfg)
+
+        # Optional sanity check: loader's own entity_type vs expected
+        if getattr(loader, "entity_type", None) != expected_entity_type:
+            raise ValueError(
+                f"Loader '{loader_name}' for entity '{entity_name}' reports "
+                f"entity_type={loader.entity_type}, but config implies {expected_entity_type}."
+            )
+
         factory.register(loader)
 
     return factory

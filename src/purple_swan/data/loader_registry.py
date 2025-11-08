@@ -1,30 +1,22 @@
 # purple_swan/data/loader_registry.py
-from typing import Dict, Type, Callable, Mapping, Any
-from purple_swan.data.models.models import  EntityType
-from purple_swan.data.models.data_loader import DataLoader
+from __future__ import annotations
+from typing import Dict, Type, Callable, Any
 
-_LOADER_REGISTRY: Dict[str, Type[DataLoader]] = {}
+from purple_swan.data.loaders.data_loader import DataLoader
+
+_LOADER_REGISTRY: Dict[str, Type[DataLoader[Any]]] = {}
 
 
-def register_loader(name: str) -> Callable[[Type[DataLoader]], Type[DataLoader]]:
-    """
-    Decorator to register a DataLoader subclass under a string key.
-
-    Example:
-        @register_loader("s3_instruments")
-        class S3InstrumentLoader(DataLoader):
-            ...
-    """
-    def decorator(cls: Type[DataLoader]) -> Type[DataLoader]:
+def register_loader(name: str) -> Callable[[Type[DataLoader[Any]]], Type[DataLoader[Any]]]:
+    def decorator(cls: Type[DataLoader[Any]]) -> Type[DataLoader[Any]]:
         if name in _LOADER_REGISTRY:
             raise ValueError(f"Loader '{name}' already registered")
         _LOADER_REGISTRY[name] = cls
         return cls
-
     return decorator
 
 
-def get_loader_cls(name: str) -> Type[DataLoader]:
+def get_loader_cls(name: str) -> Type[DataLoader[Any]]:
     try:
         return _LOADER_REGISTRY[name]
     except KeyError:

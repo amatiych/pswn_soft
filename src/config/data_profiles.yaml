@@ -13,18 +13,18 @@ profiles:
   s3:
     instrument:
       loader: s3_instruments
-      bucket: purple-swan-prod-data
+      bucket: pswn-test
       key: instruments/latest.parquet
 
     portfolio:
       loader: s3_portfolios
-      bucket: purple-swan-prod-data
+      bucket: pswn-test
       key: portfolios/latest.parquet
 
-    position:
-      loader: s3_positions
-      bucket: purple-swan-prod-data
-      key: positions/latest.parquet
+#    position:
+#      loader: s3_positions
+#      bucket: purple-swan-prod-data
+#      key: positions/latest.parquet
 
   # ---------------------------------------------------------------------------
   # All data sources from a relational database
