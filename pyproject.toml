@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "aleksey matiychenko", email = "aleksey@purpleswansoftware.com"},
 ]
-dependencies = ["pandas>=2.3.3", "fsspec>=2025.10.0", "s3fs>=2025.10.0", "boto3>=1.40.61", "finnhub-python>=2.4.25", "pyarrow>=22.0.0", "yfinance>=0.2.66", "pyyaml>=6.0.3"]
+dependencies = ["pandas>=2.3.3", "fsspec>=2025.10.0", "s3fs>=2025.10.0", "boto3>=1.40.61", "finnhub-python>=2.4.25", "pyarrow>=22.0.0", "yfinance>=0.2.66", "pyyaml>=6.0.3", "pandas-datareader>=0.10.0", "setuptools>=70", "standard-distutils>=3.11.9", "statsmodels>=0.14.5"]
 requires-python = ">=3.13"
 readme = "README.md"
 license = {text = "MIT"}

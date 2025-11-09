@@ -29,16 +29,19 @@ class S3PortfolioDataLoader(DataLoader[Portfolio]):
     def load(self, filters: dict = None) -> List[Portfolio]:
         all_files = list_s3_files(self.bucket_name,prefix='portfolios')
         port_name_folders = [s.split('/')[1] for s in all_files]
-        port_names = [p.split("=")[-1] for p in port_name_folders]
+        port_names = list(set([p.split("=")[-1] for p in port_name_folders]))
         if filters and 'portfolios' in filters:
             port_list = filters['portfolios'].split(',')
             port_names = [p for p in port_names if p in port_list ]
         dfs = []
         for p in port_names:
-            file = f"portfolios/name={p}/portfolio.{self.file_format}"
+            file = f"portfolios/port_name={p}/portfolio.{self.file_format}"
             url = f"s3://{self.bucket_name}/{file}"
-            print (f"reading {file}")
-            dfs.append(self.read_fun(url))
+            print (f"reading portfolio: {file}")
+            try:
+                dfs.append(self.read_func(url))
+            except Exception as e:
+                print(f"WARNING: could not read {url}")
         return(concat(dfs))
 
 
