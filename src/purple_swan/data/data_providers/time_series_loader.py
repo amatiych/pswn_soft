@@ -15,14 +15,17 @@ class TimeSeriesProvider(ABC):
 
 
 class YahooTimeSeriesProvider(TimeSeriesProvider):
-    def get_time_series(self, symbol : str, start_date: str, end_date: str) -> List[TimePoint]:
+    def get_time_series(self, symbol : list[str], start_date: str, end_date: str) -> List[TimePoint]:
         import yfinance as yf
         df = yf.download(symbol, start=start_date, end=end_date)
         df = df['Close']
+
         df['date'] = df.index.map(lambda x: x.strftime('%Y%m%d'))
-        df.rename(columns={symbol:'value'},inplace=True)
-        df = df[['date','value']]
-        points = df_to_dataclasses(df,TimePoint)
-        return points
+        #df.rename(columns={symbol:'value'},inplace=True)
+        #df = df[['date','value']]
+        return df.set_index('date')
+
+        # points = df_to_dataclasses(df,TimePoint)
+        # return points
 
 

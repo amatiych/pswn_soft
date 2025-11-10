@@ -1,3 +1,4 @@
+from pandas import read_csv
 from typing import Mapping,Any
 from purple_swan.data.models.models import EntityType, List, Instrument
 from purple_swan.data.loader_registry import register_loader
@@ -37,18 +38,19 @@ class S3InstrumentsDataLoader(S3DataLoaderBase[Instrument]):
         s3 = self._get_s3_client()
         obj = s3.get_object(Bucket=self.bucket, Key=self.key)
         # Adjust to your actual format: parquet, csv, etc.
-        df = pd.read_parquet(obj["Body"])
-        # You can apply filters here if you want.
-        return [
-            Instrument(
-                id=str(row["id"]),
-                symbol=row["symbol"],
-                name=row["name"],
-                currency=row["currency"],
-                asset_class=row["asset_class"],
-            )
-            for _, row in df.iterrows()
-        ]
+        return read_csv(obj["Body"])
+        # df = read_parquet(obj["Body"])
+        # # You can apply filters here if you want.
+        # return [
+        #     Instrument(
+        #         id=str(row["id"]),
+        #         symbol=row["symbol"],
+        #         name=row["name"],
+        #         currency=row["currency"],
+        #         asset_class=row["asset_class"],
+        #     )
+        #     for _, row in df.iterrows()
+        # ]
 
     def write(self, data: List[Instrument]) -> None:
         # Example: convert dataclasses back to DataFrame and upload.
