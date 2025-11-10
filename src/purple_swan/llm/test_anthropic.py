@@ -1,5 +1,4 @@
 import anthropic
-API_KEY='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'
 def generate_trading_signal(ticker, portfolio_position=None):
     client = anthropic.Anthropic(api_key=API_KEY)
 
