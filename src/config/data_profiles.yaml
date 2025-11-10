@@ -14,7 +14,7 @@ profiles:
     instrument:
       loader: s3_instruments
       bucket: pswn-test
-      key: stocks.csv
+      key: instruments/latest.parquet
 
     portfolio:
       loader: s3_portfolios
