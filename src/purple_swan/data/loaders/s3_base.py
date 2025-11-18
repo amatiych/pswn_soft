@@ -5,10 +5,10 @@ from typing import Generic, TypeVar
 
 import boto3
 
-from purple_swan.data.loaders.data_loader import DataLoader, T_co
+from purple_swan.data.loaders.data_loader import DataLoader, T
 
 
-class S3DataLoaderBase(DataLoader[T_co], Generic[T_co]):
+class S3DataLoaderBase(DataLoader[T], Generic[T]):
     """
     Base class for S3-based loaders.
 
@@ -16,7 +16,8 @@ class S3DataLoaderBase(DataLoader[T_co], Generic[T_co]):
     - Provides a boto3 S3 client helper.
     """
 
-    def __init__(self, region: str | None = None):
+    def __init__(self, region: str | None = None, **kwargs):
+        super().__init__(**kwargs)
         self.region = region or "us-east-1"
 
     @staticmethod

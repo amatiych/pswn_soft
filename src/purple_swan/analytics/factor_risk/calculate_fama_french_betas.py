@@ -127,8 +127,13 @@ rets_long.index.names = ["date", "asset"]
 # Merge
 data_cs = pd.concat([rets_long, expos_long], axis=1).dropna()
 print(data_cs.head())
-data_cs.to_csv('s3://pswn-test/markat_data/factors/all_exposures.csv')
-data_cs.to_parquet('s3://pswn-test/markat_data/factors/all_exposures.parquet',compression='snappy')
+data_cs.reset_index(inplace=True)
+for d, df in data_cs.groupby('date'):
+    print(f"Saving factor data for {d}")
+    url = f's3://pswn-test/markat_data/factors/date={d}/all_exposures.csv'
+    df.to_csv(url,index=False,header=True)
+    url = f's3://pswn-test/markat_data/factors/date={d}/all_exposures.parquet'
+    df.to_parquet(url,index=False,compression='snappy')
 
 
 def run_cross_sectional_regressions(data_cs, factor_names):
@@ -177,7 +182,7 @@ print(residuals.head())
 
 
 factor_cov = factor_returns.cov() * 252
-data_cs.to_csv('s3://pswn-test/markat_data/factors/factor_cov.csv')
+factor_cov.to_csv('s3://pswn-test/markat_data/factors/factor_cov.csv')
 
 resid_df = residuals.unstack("asset")
 spec_vol = resid_df.std() * np.sqrt(252)

@@ -11,8 +11,8 @@ class S3InstrumentsDataLoader(S3DataLoaderBase[Instrument]):
 
     entity_type = EntityType.INSTRUMENT
 
-    def __init__(self, bucket: str, key: str, region: str | None = None):
-        super().__init__(region=region)
+    def __init__(self, bucket: str, key: str, region: str | None = None, **kwargs):
+        super().__init__(region=region, **kwargs)
         self.bucket = self._resolve_bucket(bucket)
         self.key = key
 

@@ -54,7 +54,8 @@ def main() -> None:
 
     # Perform the load
     print(f"📦 Loading data for entity: {entity_type.name}")
-    data = factory.get_data(entity_type)
+    filters = {'cik':['1002784','1013538']}
+    data = factory.get_data(entity_type,filters=filters)
 
     print("\n✅ Load complete.")
     print(f"Type: {type(data)}")

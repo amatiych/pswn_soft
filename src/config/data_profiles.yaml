@@ -19,7 +19,7 @@ profiles:
     portfolio:
       loader: s3_portfolios
       bucket: pswn-test
-      key: portfolios/latest.parquet
+      key: market_data/sec
 
 #    position:
 #      loader: s3_positions

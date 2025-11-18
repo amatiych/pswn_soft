@@ -1,7 +1,7 @@
 from dataclasses import dataclass, asdict
 from enum import Enum
 from typing import Any, Dict, Generic, List, TypeVar, Tuple
-
+T  = TypeVar("T",covariant=False)
 
 class EntityType(str, Enum):
     INSTRUMENT = "instrument"
@@ -18,7 +18,14 @@ class Instrument:
     #multiplier: float = 1.0
 
 @dataclass
+class Position:
+    instrument: Instrument
+    weight: float
+    shares: float = None
+    price: float = None
+
+@dataclass
 class Portfolio:
     name: str
-    assets: List[Tuple[Instrument, float]]
+    assets: List[Position]
 

@@ -1,8 +1,9 @@
 from dataclasses import dataclass, fields
 from typing import Type, TypeVar, List
 import pandas as pd
+from purple_swan.data.models.models import T
 
-T = TypeVar("T")
+
 
 def df_to_dataclasses(df: pd.DataFrame, cls: Type[T]) -> List[T]:
     """

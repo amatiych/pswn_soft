@@ -54,7 +54,7 @@ class S3PortfolioDataLoader(DataLoader[Portfolio]):
             self.write_fun(url, df)
 
     @classmethod
-    def from_config(cls, cfg: Mapping[str, Any]) -> "S3InstrumentsDataLoader":
+    def from_config(cls, cfg: Mapping[str, Any]) -> "S3PositionsDataLoader":
         """
         Config example (YAML):
 
