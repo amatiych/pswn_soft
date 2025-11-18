@@ -4,7 +4,7 @@ from abc import  abstractmethod
 from purple_swan.core.aws_utils import list_s3_files
 from purple_swan.data.data_utils import df_to_dataclasses
 from purple_swan.data.loaders.data_loader import DataLoader, T
-from typing import Any, Generic, List, Mapping, get_args, get_origin
+from typing import Any, Generic, List, Mapping
 
 FILE_TYPE_FUNCS = {
     "parquet": [read_parquet,DataFrame.to_parquet],
@@ -72,7 +72,7 @@ class FileSourceDataLoader(DataLoader, Generic[T]):
             except Exception as e:
                 print(f"WARNING: could not read {url}")
         final_df = (concat(dfs))
-        res = df_to_dataclasses(final_df,T)
+        res = df_to_dataclasses(final_df, T)
         return res
 
 class S3DataLoader(FileSourceDataLoader, Generic[T]):

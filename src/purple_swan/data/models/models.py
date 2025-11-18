@@ -18,14 +18,14 @@ class Instrument:
     #multiplier: float = 1.0
 
 @dataclass
-class Position:
-    instrument: Instrument
+class Portfolio:
+    ticker : str
     weight: float
     shares: float = None
     price: float = None
 
-@dataclass
-class Portfolio:
-    name: str
-    assets: List[Position]
+# @dataclass
+# class PortfolioOld:
+#     name: str
+#     assets: List[Position]
 
