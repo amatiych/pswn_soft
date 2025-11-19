@@ -48,8 +48,8 @@ def main() -> None:
 
     # Map entity argument to EntityType enum
     try:
-        pos_entity_type = EntityType['POSITION']
-        inst_entity_type = EntityType['INSTRUMENT']
+        pos_entity_type = EntityType.POSITION
+        inst_entity_type = EntityType.INSTRUMENT
 
     except KeyError:
         raise SystemExit(f"Unknown entity type '{args.entity}'. Must match EntityType values.")

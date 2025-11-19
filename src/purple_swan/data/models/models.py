@@ -1,27 +1,41 @@
-from dataclasses import dataclass, asdict
+from pandas import DataFrame
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Generic, List, TypeVar, Tuple
+from typing import TypeVar, Optional
 T  = TypeVar("T",covariant=False)
 
 class EntityType(str, Enum):
     INSTRUMENT = "instrument"
     PORTFOLIO = "portfolio",
-    POSITION = "position"
+    POSITION = "position",
+    TS_MATRIX = "ts_matrix",
 
 @dataclass
 class Instrument:
     symbol: str
     security_name: str
-    #asset_class: str
-    #currency: str = "USD"
-    #multiplier: float = 1.0
+    # asset_class: Optional[str]
+    # currency: Optional[str] = "USD"
+    # multiplier: Optional[float] = 1.0
 
 @dataclass
 class Position:
     ticker : str
     weight: float
-    shares: float = None
-    price: float = None
+    shares: Optional[float] = None
+    price: Optional[float] = None
+
+@dataclass
+class TSMatrix:
+    data : DataFrame
+
+    @property
+    def dates(self):
+        return self.data.index
+
+    @property
+    def tickers(self):
+        return self.data.columns.tolist()
 
 
 # @dataclass

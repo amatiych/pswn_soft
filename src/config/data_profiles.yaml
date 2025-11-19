@@ -21,6 +21,11 @@ profiles:
       bucket: pswn-test
       key: market_data/sec
 
+    ts_matrix:
+      loader: ts_matrix_pq
+      bucket: pswn-test
+      key: all_time_series
+
 #    position:
 #      loader: s3_positions
 #      bucket: purple-swan-prod-data
