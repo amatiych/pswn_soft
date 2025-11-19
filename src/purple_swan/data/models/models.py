@@ -5,9 +5,8 @@ T  = TypeVar("T",covariant=False)
 
 class EntityType(str, Enum):
     INSTRUMENT = "instrument"
-    PORTFOLIO = "portfolio"
-
-
+    PORTFOLIO = "portfolio",
+    POSITION = "position"
 
 @dataclass
 class Instrument:
@@ -18,11 +17,12 @@ class Instrument:
     #multiplier: float = 1.0
 
 @dataclass
-class Portfolio:
+class Position:
     ticker : str
     weight: float
     shares: float = None
     price: float = None
+
 
 # @dataclass
 # class PortfolioOld:

@@ -6,10 +6,65 @@ from purple_swan.data.data_utils import df_to_dataclasses
 from purple_swan.data.loaders.data_loader import DataLoader, T
 from typing import Any, Generic, List, Mapping
 
+from purple_swan.data.models.models import Position
+
 FILE_TYPE_FUNCS = {
     "parquet": [read_parquet,DataFrame.to_parquet],
-    "csv": [read_csv,DataFrame.to_csv],
+    "csv": [read_csv,DataFrame.to_csv]
 }
+
+class SingleFiledDataLoader(DataLoader, Generic[T]):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.file_format = kwargs.get("file_format", "csv")
+        self.key = kwargs.get("key")
+        self.read_func,self.write_func = FILE_TYPE_FUNCS[self.file_format]
+
+    def url_prefix(self):
+        return "file"
+
+    def get_url(self):
+        return f"{self.url_prefix()}://{self.key}.{self.file_format}"
+
+    def load(self,filters = {}):
+        data = self.read_func(self.get_url())
+        data.rename(columns=self.get_column_map(),inplace=True)
+        columns = data.columns
+        if filters:
+            for k,v in filters.items():
+                if k in columns:
+                    idx = data[k].isin(v)
+                    data = data[idx]
+        return df_to_dataclasses(data,T)
+
+class SingleFiledDataLoaderS3(SingleFiledDataLoader, Generic[T]):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.key = kwargs["key"]
+        self.bucket_name = kwargs["bucket"]
+
+    def get_url(self):
+        return f"{self.url_prefix()}://{self.bucket_name}/{self.key}.{self.file_format}"
+
+    def url_prefix(self):
+        return "s3"
+
+    @classmethod
+    def from_config(cls, cfg: Mapping[str, Any]) -> "S3PositionDataLoader":
+        """
+        Config example (YAML):
+
+            instrument:
+              loader: s3_instruments
+              bucket: pawn-{env}
+              key: instruments/latest.parquet
+              region: us-east-1
+        """
+        return cls(
+            bucket=cfg["bucket"],
+            key=cfg["key"]
+        )
 
 class FileSourceDataLoader(DataLoader, Generic[T]):
 
@@ -17,7 +72,6 @@ class FileSourceDataLoader(DataLoader, Generic[T]):
         super().__init__(**kwargs)
         self.file_format = "parquet"
         self.read_func, self.write_func = FILE_TYPE_FUNCS[self.file_format]
-
 
     @abstractmethod
     def list_items(self, filters: Mapping[str, Any]):
@@ -92,3 +146,19 @@ class S3DataLoader(FileSourceDataLoader, Generic[T]):
         files = list_s3_files(self.bucket_name,prefix=self.key)
         files = [f for f in files if f.endswith(self.file_format)]
         return files
+
+    @classmethod
+    def from_config(cls, cfg: Mapping[str, Any]) -> "S3PositionDataLoader":
+        """
+        Config example (YAML):
+
+            instrument:
+              loader: s3_instruments
+              bucket: pawn-{env}
+              key: instruments/latest.parquet
+              region: us-east-1
+        """
+        return cls(
+            bucket=cfg["bucket"],
+            key=cfg["key"]
+        )

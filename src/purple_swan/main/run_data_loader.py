@@ -20,7 +20,7 @@ import os
 from pprint import pprint
 from purple_swan.data.factory_builder import build_factory_from_profile
 from purple_swan.data.models.models import EntityType
-
+from pandas import DataFrame
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run sample data load using DataFactory.")
@@ -48,16 +48,20 @@ def main() -> None:
 
     # Map entity argument to EntityType enum
     try:
-        entity_type = EntityType[args.entity.upper()]
+        pos_entity_type = EntityType['POSITION']
+        inst_entity_type = EntityType['INSTRUMENT']
+
     except KeyError:
         raise SystemExit(f"Unknown entity type '{args.entity}'. Must match EntityType values.")
 
     # Perform the load
-    print(f"📦 Loading data for entity: {entity_type.name}")
+    print(f"📦 Loading data for entity: {pos_entity_type.name}")
     filters = {'cik':['1002784','1013538']}
-    data = factory.get_data(entity_type,filters=filters)
-
+    all_positions = factory.get_data(pos_entity_type,filters=filters)
+    all_instruments = factory.get_data(inst_entity_type)
+    print(DataFrame(all_instruments))
     print("\n✅ Load complete.")
+    data = all_instruments
     print(f"Type: {type(data)}")
     try:
         import pandas as pd
@@ -69,6 +73,9 @@ def main() -> None:
 
     print("\nFactory loaders registered:")
     pprint(factory._loaders)
+
+    inst_df = DataFrame(all_instruments)
+    print(inst_df.head())
 
 
 if __name__ == "__main__":

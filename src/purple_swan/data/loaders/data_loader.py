@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generic, List, Mapping,TypeVar
+from typing import Any, Generic, List, Mapping,TypeVar, Dict
 from purple_swan.data.models.models import EntityType, T
 
 class DataLoader(ABC, Generic[T]):
@@ -40,4 +40,5 @@ class DataLoader(ABC, Generic[T]):
         """
         raise NotImplementedError
 
-
+    def get_column_map(self) -> Dict[str,str]:
+        return {}

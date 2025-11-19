@@ -12,12 +12,12 @@ profiles:
   # ---------------------------------------------------------------------------
   s3:
     instrument:
-      loader: s3_instruments
+      loader: s3_instruments_csv
       bucket: pswn-test
-      key: instruments/latest.parquet
+      key: assets/active_list
 
-    portfolio:
-      loader: s3_portfolios
+    position:
+      loader: s3_positions_pq
       bucket: pswn-test
       key: market_data/sec
 
