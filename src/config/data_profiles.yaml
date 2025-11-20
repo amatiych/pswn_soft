@@ -16,6 +16,11 @@ profiles:
       bucket: pswn-test
       key: assets/active_list
 
+    portfolio:
+      loader: s3_portfolios_pq
+      bucket: pswn-test
+      key: portfolios/company_list
+
     position:
       loader: s3_positions_pq
       bucket: pswn-test

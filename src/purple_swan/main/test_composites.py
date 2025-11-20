@@ -1,6 +1,6 @@
 from purple_swan.data.factory_builder import build_factory_from_profile
-from purple_swan.data.environment import Environment , EnvironmentRepository
-from purple_swan.data.loaders.position_enricher import PositionEnricher
+from purple_swan.data.environment import EnvironmentRepository
+from purple_swan.data.enrichment.position_enricher import PositionInstrumentEnricher
 from purple_swan.data.data_providers.time_series_loader import YahooTimeSeriesProvider
 from purple_swan.data.models.models import Position
 import os
@@ -37,7 +37,7 @@ def main():
     repo = EnvironmentRepository(factory)
 
     # Register enrichers
-    repo.register_enricher(PositionEnricher(), Position)
+    repo.register_enricher(PositionInstrumentEnricher(), Position)
 
 
     # Optional: add time series

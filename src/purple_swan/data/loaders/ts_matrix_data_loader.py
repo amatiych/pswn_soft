@@ -1,9 +1,9 @@
 
-from purple_swan.data.models.models import EntityType, List, Instrument, TSMatrix
+from purple_swan.data.models.models import EntityType, Instrument, TSMatrix
 from purple_swan.data.loader_registry import register_loader
 from purple_swan.data.loaders.file_source_data_loader import SingleFiledDataLoaderS3, S3DataLoader
 from purple_swan.data.loaders.file_source_data_loader import FILE_TYPE_FUNCS
-from typing import  Mapping,Any
+from typing import  Mapping,Any, List
 
 @register_loader("ts_matrix_pq")
 class S3TSMatricDataLoader(S3DataLoader[TSMatrix]):

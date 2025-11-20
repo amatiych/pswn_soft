@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import pandas as pd
 from purple_swan.data.data_factory import DataFactory
 from purple_swan.data.models.models import EntityType, Position, Instrument, T
-from purple_swan.data.enrichment import DataEnricher, EnrichmentContext
+from purple_swan.data.enrichment.enrichment import DataEnricher, EnrichmentContext
 
 @dataclass
 class Environment:

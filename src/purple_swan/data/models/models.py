@@ -38,8 +38,8 @@ class TSMatrix:
         return self.data.columns.tolist()
 
 
-# @dataclass
-# class PortfolioOld:
-#     name: str
-#     assets: List[Position]
+@dataclass
+class Portfolio:
+    cik:str
+    name: str
 

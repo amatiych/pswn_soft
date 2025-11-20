@@ -50,6 +50,8 @@ def main() -> None:
     try:
         pos_entity_type = EntityType.POSITION
         inst_entity_type = EntityType.INSTRUMENT
+        ts_entity_type = EntityType.TS_MATRIX
+        port_entity_type = EntityType.PORTFOLIO
 
     except KeyError:
         raise SystemExit(f"Unknown entity type '{args.entity}'. Must match EntityType values.")
@@ -59,6 +61,9 @@ def main() -> None:
     filters = {'cik':['1002784','1013538']}
     all_positions = factory.get_data(pos_entity_type,filters=filters)
     all_instruments = factory.get_data(inst_entity_type)
+    all_ports = factory.get_data(port_entity_type)
+    ts_matrix = factory.get_data(ts_entity_type)[0]
+    print(ts_matrix.data)
     print(DataFrame(all_instruments))
     print("\n✅ Load complete.")
     data = all_instruments
@@ -77,6 +82,8 @@ def main() -> None:
     inst_df = DataFrame(all_instruments)
     print(inst_df.head())
 
+    port_df = DataFrame(all_ports)
+    print(port_df.head())
 
 if __name__ == "__main__":
     main()
