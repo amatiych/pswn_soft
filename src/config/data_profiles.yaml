@@ -17,7 +17,7 @@ profiles:
       key: assets/active_list
 
     portfolio:
-      loader: s3_portfolios_pq
+      loader: s3_portfolios_csv
       bucket: pswn-test
       key: portfolios/company_list
 

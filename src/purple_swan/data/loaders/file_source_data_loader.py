@@ -34,7 +34,7 @@ class SingleFiledDataLoader(DataLoader, Generic[T]):
         if filters:
             for k,v in filters.items():
                 if k in columns:
-                    idx = data[k].isin(v)
+                    idx = data[k].apply(str).isin(v)
                     data = data[idx]
         return df_to_dataclasses(data,T)
 
@@ -86,7 +86,7 @@ class FileSourceDataLoader(DataLoader, Generic[T]):
     def filter_items(self, items, filters: Mapping[str, Any]):
 
         if filters is None:
-            return items
+            return [(item,{}) for item in items]
 
         def get_dict(item):
             parts = item.split("/")
@@ -94,7 +94,7 @@ class FileSourceDataLoader(DataLoader, Generic[T]):
             for p in parts:
                 if "=" in p:
                     k, v = p.split("=")
-                    d[k] = v
+                    d[k] = str(v)
             return d
 
         def match(item_tup, filters):
@@ -107,7 +107,7 @@ class FileSourceDataLoader(DataLoader, Generic[T]):
             return True
 
         item_pairs = [(i, get_dict(i)) for i in items]
-        items = [i for (i, d) in item_pairs if match((i, d), filters)]
+        items = [(i,d) for (i, d) in item_pairs if match((i, d), filters)]
         return items
 
     def load(self, filters: dict = None) -> List[T]:
@@ -116,13 +116,16 @@ class FileSourceDataLoader(DataLoader, Generic[T]):
         files = self.filter_items(all_files, filters)
         dfs = []
 
-        for file in files:
+        for file,d in files:
             #file = f"portfolios/port_name={p}/portfolio.{self.file_format}"
             #url = f"{self.url_prefix()}://{self.bucket_name}/{file}"
             url = self.get_url(file)
             print(f"reading portfolio: {file}")
             try:
-                dfs.append(self.read_func(url))
+                df = self.read_func(url)
+                for k,v in d.items():
+                    df[k] = v
+                dfs.append(df)
             except Exception as e:
                 print(f"WARNING: could not read {url}")
         final_df = (concat(dfs))

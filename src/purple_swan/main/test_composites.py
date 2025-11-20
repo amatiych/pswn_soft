@@ -1,8 +1,9 @@
 from purple_swan.data.factory_builder import build_factory_from_profile
 from purple_swan.data.environment import EnvironmentRepository
+from purple_swan.data.enrichment.portfolio_enricher import  PortfolioEnricher13F,PortfolioTSMatrixEnricher
 from purple_swan.data.enrichment.position_enricher import PositionInstrumentEnricher
 from purple_swan.data.data_providers.time_series_loader import YahooTimeSeriesProvider
-from purple_swan.data.models.models import Position
+from purple_swan.data.models.models import Position, Portfolio
 import os
 import argparse
 
@@ -31,32 +32,26 @@ def main():
     )
 
     # Build factory as before
- #   factory = build_factory_from_profile(profile="s3")
+    # factory = build_factory_from_profile(profile="s3")
 
     # Create composed repository
     repo = EnvironmentRepository(factory)
 
     # Register enrichers
     repo.register_enricher(PositionInstrumentEnricher(), Position)
-
-
+    repo.register_enricher(PortfolioEnricher13F(), Portfolio)
+    repo.register_enricher(PortfolioTSMatrixEnricher(), Portfolio)
     # Optional: add time series
     repo.set_time_series_provider(YahooTimeSeriesProvider())
 
-    # Load complete portfolio data in one call
-    portfolio_data = repo.load_portfolio_data(
-        position_filters = {'cik':['1002784','1013538']},
-        include_time_series=False
-    )
 
-    # Now you have everything linked:
-    print(portfolio_data.position_df)  # Positions with instrument details
-    portfolio_data.position_df.to_csv("/tmp/portfolio.csv")
-    #print(portfolio_data.time_series)  # Historical prices
+    env = repo.load_portfolio_data(
+        position_filters = {'cik': ['1021223']},
+        include_time_series=False)
 
-    # Pass to analytics
-    # var_engine = VarEngine(portfolio_data.time_series, portfolio_data.position_df['weight'])
+    port_data = env.portfolios[0]
 
+    print(port_data.ts_matrix.dropna())
 
 if __name__ == "__main__":
     main()

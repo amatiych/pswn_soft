@@ -1,7 +1,7 @@
 from pandas import DataFrame
 from dataclasses import dataclass
 from enum import Enum
-from typing import TypeVar, Optional
+from typing import TypeVar, Optional, List
 T  = TypeVar("T",covariant=False)
 
 class EntityType(str, Enum):
@@ -22,8 +22,10 @@ class Instrument:
 class Position:
     ticker : str
     weight: float
+    cik: int
     shares: Optional[float] = None
     price: Optional[float] = None
+
 
 @dataclass
 class TSMatrix:
@@ -40,6 +42,17 @@ class TSMatrix:
 
 @dataclass
 class Portfolio:
-    cik:str
+
+    cik: str
     name: str
 
+    def __post_init__(self):
+        self._positions: List[Position] = []
+
+    @property
+    def positions(self) -> List[Position]:
+        return self._positions
+
+    @positions.setter
+    def positions(self,value:List[Position]):
+        self._positions = value
