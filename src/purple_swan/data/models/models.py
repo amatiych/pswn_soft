@@ -48,6 +48,7 @@ class Portfolio:
 
     def __post_init__(self):
         self._positions: List[Position] = []
+        self._ts_matrix: TSMatrix = None
 
     @property
     def positions(self) -> List[Position]:
@@ -56,3 +57,11 @@ class Portfolio:
     @positions.setter
     def positions(self,value:List[Position]):
         self._positions = value
+
+    @property
+    def ts_matrix(self):
+        return self._ts_matrix
+
+    @ts_matrix.setter
+    def ts_matrix(self,value:TSMatrix):
+        self._ts_matrix = value
