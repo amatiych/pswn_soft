@@ -1,7 +1,7 @@
 from pandas import DataFrame
 from dataclasses import dataclass
 from enum import Enum
-from typing import TypeVar, Optional, List
+from typing import TypeVar, Optional, List, Dict
 T  = TypeVar("T",covariant=False)
 
 class EntityType(str, Enum):
@@ -47,15 +47,15 @@ class Portfolio:
     name: str
 
     def __post_init__(self):
-        self._positions: List[Position] = []
+        self._positions: Dict[str,Position] = {}
         self._ts_matrix: TSMatrix = None
 
     @property
-    def positions(self) -> List[Position]:
+    def positions(self) -> Dict[str,Position]:
         return self._positions
 
     @positions.setter
-    def positions(self,value:List[Position]):
+    def positions(self,value:Dict[str,Position]):
         self._positions = value
 
     @property
@@ -65,3 +65,26 @@ class Portfolio:
     @ts_matrix.setter
     def ts_matrix(self,value:TSMatrix):
         self._ts_matrix = value
+
+
+    def trade(self,ticker:str, shares: float, price: float):
+        trade_value = price * shares
+        port_value = sum([p.price * p.shares for t,p in self.positions.items()])
+        new_port_value = port_value - trade_value + trade_value
+
+        if ticker in self._positions:
+            current_pos = self._positions[ticker]
+            current_pos.shares += shares
+            current_pos.price = price
+        else:
+            current_pos = Position(ticker=ticker,shares=shares,price=price,cik=self.cik)
+            self.positions[ticker] = current_pos
+
+        for ticker,position in self.positions.items():
+            position.weight = position.shares * price / new_port_value
+
+
+
+
+
+

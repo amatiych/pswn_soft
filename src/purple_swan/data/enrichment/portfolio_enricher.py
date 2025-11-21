@@ -14,8 +14,7 @@ class PortfolioEnricher13F(DataEnricher[Portfolio]):
 
         for portfolio in portfolios:
             cik = portfolio.cik
-            port_positions = [p for p in positions if str(p.cik) == str(cik)]
-
+            port_positions = {p.ticker:p for p in positions if str(p.cik) == str(cik)}
             if len(port_positions) > 0:
                 portfolio.positions = port_positions
         return portfolios
@@ -30,18 +29,15 @@ class PortfolioTSMatrixEnricher(DataEnricher[Portfolio]):
         ts_data.reset_index().set_index("date", inplace=True)
         tickers = ts_data.columns
 
-        pos_ts_matrix = DataFrame(ts_data.index)
         dfs = []
         for port in portfolios:
-            for position in port.positions:
-                ticker = position.ticker
+            for ticker,position in port.positions.items():
                 if ticker not in tickers:
                     df =  DataFrame(ts_data.index)
                     df[ticker] = 0
                     df.set_index("date", inplace=True)
                 else:
                     df = ts_data[ticker].to_frame()
-
                 dfs.append(df)
             if len(dfs) > 0:
                 port.ts_matrix = concat(dfs,axis=1)
