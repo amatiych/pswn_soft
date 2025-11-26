@@ -1,9 +1,8 @@
-from numpy import argpartition
 from pandas import read_parquet
 import numpy as np
 import json
 from purple_swan.core.timer import timed
-
+from numba import njit
 """
     Simplified Version of VaR Engine.
     It calculates the following measures:
@@ -14,6 +13,7 @@ from purple_swan.core.timer import timed
 
 """
 class VaR:
+
     def __init__(self,*, ci, var, k, es,idx,
                  marginal_var=[], incremental_var=[]):
         self.ci = float(ci)
@@ -30,7 +30,7 @@ class VaR:
 
     def to_json(self):
         return json.dumps(self.__dict__)
-
+@njit(cache=True, fastmath=True)
 def calc_var_core(P, cis):
     """
     P   : 1D array (T,)
@@ -53,51 +53,91 @@ def calc_var_core(P, cis):
         k = int((1.0 - ci) * T)
         ks[i] = k
 
-        idx = argpartition(P, k)
+        idx = np.argpartition(P, k)
         idxs[i, :] = idx
         vars_[i] = -P[idx[k]]
 
     return vars_, ks, idxs
+
+@njit(cache=True, fastmath=True)
+def calc_expected_shortfall(P, idx, k):
+    """Calculate expected shortfall using numba - vectorized numpy operations."""
+    return np.mean(P[idx[:k]])
+
+@njit(cache=True, fastmath=True)
+def calc_marginal_var_batch(P, C, k):
+    """
+    Optimized marginal VaR calculation using numba.
+    Processes each asset column efficiently.
+    
+    P   : 1D array (T,) - portfolio P&L
+    C   : 2D array (T, N) - component contributions R * W
+    k   : int - index for VaR threshold
+    
+    Returns:
+        var_wo : 1D array (N,) - VaR without each asset
+    """
+    T, N = C.shape
+    var_wo = np.empty(N, dtype=np.float64)
+    
+    # Process each asset separately - numba-friendly approach
+    for i in range(N):
+        P_wo = P - C[:, i]
+        kth_val = np.partition(P_wo, k)[k]
+        var_wo[i] = -kth_val
+    
+    return var_wo
 
 class VarEngine:
 
     def __init__(self, df_time_series, W):
         self.df_time_series = df_time_series
         self.df_returns = self.df_time_series.pct_change(1)
-        self.R = self.df_returns.values.astype(np.float64)
+        self.R = self.df_returns.fillna(0).values.astype(np.float64)
         self.W = np.asarray(W, dtype=np.float64)
+        # Pre-compute component contributions (R * W) - doesn't change unless weights change
+        # This is a major optimization - C is reused across all calc_var calls
+        self._C = (self.R * self.W).astype(np.float64)
 
     def calc_proforma(self):
         return self.R @ self.W
-    @timed
-    def calc_var(self, cis):
+
+    def calc_var(self, cis=[0.95]):
         P = self.R @ self.W
         cis_arr = np.asarray(cis, dtype=np.float64)
 
         vars_, ks, idxs = calc_var_core(P, cis_arr)
 
+        # C is pre-computed in __init__ - no need to recompute
+        C = self._C
+
         results = []
         for i, ci in enumerate(cis):
             k = ks[i]
             idx = idxs[i, :]
-            es = np.mean([P[i] for i in idx[:k]])
+            
+            # OPTIMIZATION 1: Numba-accelerated ES calculation
+            # Old: es = np.mean([P[j] for j in idx[:k]])
+            # New: Numba-accelerated numpy array indexing
+            es = calc_expected_shortfall(P, idx, k)
+            
             var = -1 * float(vars_[i])
-
-            #broadcasting the vectors removes the need for loops
-            P_wo = P[:, None] - self.R * self.W
-            kth_vals = np.partition(P_wo, k, axis=0)[k, :]  # (N,)
-            var_wo = -kth_vals  # VaR without each name
-            mar_var = var - var_wo  # (N,)
             var_idx = int(idx[k])
-            inc_var = self.R[var_idx,:] * self.W
+            
+            # OPTIMIZATION 2: Numba-accelerated marginal VaR calculation
+            # Uses numba-optimized loop instead of numpy broadcasting + partition
+            # This is faster for large numbers of assets
+            var_wo = calc_marginal_var_batch(P, C, k)  # (N,)
+            mar_var = var - var_wo  # (N,)
+            inc_var = C[var_idx, :]
 
             results.append(
                 VaR(
                     ci = float(ci),
                     var = var,
                     k = var_idx,
-                    es = es,
-                    idx = [int(i) for i in idx[:k]],
+                    es = float(es),
+                    idx = [int(j) for j in idx[:k]],
                     marginal_var = [float(mv) for mv in mar_var],
                     incremental_var = [float(iv) for iv in inc_var]
                 )
@@ -111,8 +151,15 @@ if __name__ == "__main__":
     N = len(df_ts.columns)
     weights = [1.0 / N] * N
     var_e = VarEngine(df_ts, weights)
-    res = var_e.calc_var([0.95])
-    res = res[0]
+
+
+    @timed
+    def run_var():
+        for _ in range (1000):
+            res = var_e.calc_var([0.95])
+        return res[0]
+
+    res = run_var()
     var = res.var
     ivars = res.incremental_var
     tot_ivar = sum(ivars)

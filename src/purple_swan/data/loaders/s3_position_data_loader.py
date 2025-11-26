@@ -41,6 +41,10 @@ class S3PositionDataLoaderParquet (S3PositionDataLoader):
 @register_loader("s3_positions_csv")
 class S3PositionDataLoaderCsv (S3PositionDataLoader):
     def __init__(self, **kwargs):
+        kwargs.setdefault("file_format", "csv")
         super().__init__(**kwargs)
 
 
+
+    def file_tye(self) -> str:
+        return "csv"

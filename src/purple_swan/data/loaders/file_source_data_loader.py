@@ -70,7 +70,7 @@ class FileSourceDataLoader(DataLoader, Generic[T]):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.file_format = "parquet"
+        self.file_format = kwargs.get("file_format", "csv")
         self.read_func, self.write_func = FILE_TYPE_FUNCS[self.file_format]
 
     @abstractmethod
