@@ -42,3 +42,22 @@ class PortfolioTSMatrixEnricher(DataEnricher[Portfolio]):
             if len(dfs) > 0:
                 port.ts_matrix = concat(dfs,axis=1)
         return portfolios
+
+
+class PortfolioFactorMatrixEnricher(DataEnricher[Portfolio]):
+
+    def can_enrich(self, data_type: type) -> bool:
+        return data_type == Portfolio
+
+    def enrich(self, portfolios: List[Portfolio], context: EnrichmentContext) -> List[Portfolio]:
+
+        factor_model = context.cache.get("factor_models", [])[0].data
+
+        for port in portfolios:
+            tickers = port.positions.keys()
+            df = DataFrame(index=tickers,columns=factor_model.columns)
+            df.fillna(0.0,inplace=True)
+            common_index = df.index.intersection(factor_model.index)
+            df.loc[common_index,:] = factor_model.loc[common_index,:]
+            port.factor_matrix = df
+        return portfolios

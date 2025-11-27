@@ -1,6 +1,6 @@
 from purple_swan.data.factory_builder import build_factory_from_profile
 from purple_swan.data.environment import EnvironmentRepository
-from purple_swan.data.enrichment.portfolio_enricher import  PortfolioEnricher13F,PortfolioTSMatrixEnricher
+from purple_swan.data.enrichment.portfolio_enricher import  PortfolioEnricher13F,PortfolioTSMatrixEnricher,PortfolioFactorMatrixEnricher
 from purple_swan.data.enrichment.position_enricher import PositionInstrumentEnricher
 from purple_swan.data.data_providers.time_series_loader import YahooTimeSeriesProvider
 from purple_swan.data.models.models import Position, Portfolio,FactorModel
@@ -43,6 +43,7 @@ def main():
     repo.register_enricher(PositionInstrumentEnricher(), Position)
     repo.register_enricher(PortfolioEnricher13F(), Portfolio)
     repo.register_enricher(PortfolioTSMatrixEnricher(), Portfolio)
+    repo.register_enricher(PortfolioFactorMatrixEnricher(), Portfolio)
 
     # Optional: add time series
     repo.set_time_series_provider(YahooTimeSeriesProvider())

@@ -54,6 +54,8 @@ class Portfolio:
     def __post_init__(self):
         self._positions: Dict[str,Position] = {}
         self._ts_matrix: TSMatrix = None
+        self._factor_matrix: DataFrame = None
+
 
     @property
     def positions(self) -> Dict[str,Position]:
@@ -70,6 +72,14 @@ class Portfolio:
     @ts_matrix.setter
     def ts_matrix(self,value:TSMatrix):
         self._ts_matrix = value
+
+    @property
+    def factor_matrix(self):
+        return self._factor_matrix
+
+    @factor_matrix.setter
+    def factor_matrix(self, value: TSMatrix):
+        self.factor_model = value
 
 
     def trade(self,ticker:str, shares: float, price: float):
