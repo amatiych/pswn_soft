@@ -94,23 +94,12 @@ class Portfolio:
         df = DataFrame(pos_dict).set_index("ticker")
         return df[['shares','price','cik','weight']]
 
-@dataclass
-class FactorLoading:
-    factor_name: str
-    loading:float
 
 @dataclass
 class FactorModel:
 
-
-    def __post_init__(self):
-        self._loadings: Dict[str,FactorLoading] = {}
+    data: DataFrame
 
     @property
-    def loadings(self) -> Dict[str,FactorLoading]:
-        return self._loadings
-
-    @loadings.setter
-    def positions(self,value:Dict[str,Position]):
-        self._positions = value
-
+    def tickers(self):
+        return self.data.index

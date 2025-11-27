@@ -21,6 +21,10 @@ class SingleFiledDataLoader(DataLoader, Generic[T]):
         self.key = kwargs.get("key")
         self.read_func,self.write_func = FILE_TYPE_FUNCS[self.file_format]
 
+
+    def post_load(self,res : List[T],data):
+        pass
+
     def url_prefix(self):
         return "file"
 
@@ -36,7 +40,10 @@ class SingleFiledDataLoader(DataLoader, Generic[T]):
                 if k in columns:
                     idx = data[k].apply(str).isin(v)
                     data = data[idx]
-        return df_to_dataclasses(data,T)
+
+        res =  df_to_dataclasses(data,T)
+        self.post_load(res,data)
+        return res
 
 class SingleFiledDataLoaderS3(SingleFiledDataLoader, Generic[T]):
     def __init__(self, **kwargs):

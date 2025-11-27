@@ -36,6 +36,7 @@ profiles:
       bucket: pswn-test
       key: market_data/factors/FF/ff_loadings
 
+
 #    position:
 #      loader: s3_positions
 #      bucket: purple-swan-prod-data
