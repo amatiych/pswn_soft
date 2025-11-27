@@ -1,2 +1,3 @@
 class FactorRiskCalculator:
-    def
+    def calc(self):
+        pass

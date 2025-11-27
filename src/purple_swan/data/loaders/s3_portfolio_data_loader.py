@@ -35,3 +35,4 @@ class S3PortfolioDataLoaderParquet(S3PortfolioDataLoader):
     def __init__(self,**kwargs):
         kwargs['file_format'] = "parquet"
         super().__init__(**kwargs)
+

@@ -24,12 +24,13 @@ class VaR:
         self.marginal_var = marginal_var,
         self.incremental_var = incremental_var
 
-
     def __repr__(self):
         return self.__dict__.__repr__()
 
     def to_json(self):
         return json.dumps(self.__dict__)
+
+
 @njit(cache=True, fastmath=True)
 def calc_var_core(P, cis):
     """

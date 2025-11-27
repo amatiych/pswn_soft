@@ -2,7 +2,7 @@ from typing import List, Dict, Type, TypeVar, Optional
 from dataclasses import dataclass
 import pandas as pd
 from purple_swan.data.data_factory import DataFactory
-from purple_swan.data.models.models import EntityType, Position, Instrument, T, Portfolio
+from purple_swan.data.models.models import EntityType, Position, Instrument, T, Portfolio, FactorModel
 from purple_swan.data.enrichment.enrichment import DataEnricher, EnrichmentContext
 
 @dataclass
@@ -16,6 +16,7 @@ class Environment:
     instruments: List[Instrument]
     position_df: pd.DataFrame  # Denormalized for analysis
     instrument_df: pd.DataFrame
+    factor_models: Optional[List[FactorModel]]
     time_series: Optional[pd.DataFrame] = None  # Optional: daily prices
 
 
@@ -59,7 +60,7 @@ class EnvironmentRepository:
         instruments = self.factory.get_data(EntityType.INSTRUMENT)
         ts_matrix = self.factory.get_data(EntityType.TS_MATRIX)
         portfolios = self.factory.get_data(EntityType.PORTFOLIO,position_filters)
-
+        factor_models = self.factory.get_data(EntityType.FACTOR_MODEL,{})
         # Step 2: Build context (cached data for enrichers)
         context = EnrichmentContext(
             cache={
@@ -67,6 +68,7 @@ class EnvironmentRepository:
                 'positions': positions,
                 'ts_matrix': ts_matrix,
                 'portfolios': portfolios,
+                'factor_models': factor_models
             }
         )
 
@@ -100,6 +102,7 @@ class EnvironmentRepository:
             instruments=instruments,
              position_df=None,
              instrument_df=None,
+            factor_models=factor_models,
             time_series=ts_matrix,
 
         )
