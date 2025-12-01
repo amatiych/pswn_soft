@@ -64,12 +64,18 @@ def main():
 
     weights = [port_data.positions[ticker].weight for ticker in tickers]
     ts = ts[tickers]
+
+
     from pandas import read_csv
     CV = read_csv( "s3://pswn-test/market_data/factors/ff/ff_covariance.csv")
     CV.set_index(CV.columns[0], inplace=True)
     from purple_swan.analytics.factor_risk.factor_risk_calculator import FactorRisk,FactorRiskCalculator
     fcalc = FactorRiskCalculator(CV)
-    frisk = fcalc.calcualte_factor_risk(port_data)
+
+    frisk =  fcalc.calcualte_factor_risk(port_data)
+
+
+
     print("Factor Risk Attribution")
     print(frisk.marginal_risk)
 

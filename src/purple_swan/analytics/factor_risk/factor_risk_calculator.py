@@ -5,7 +5,10 @@ from pandas import DataFrame
 from purple_swan.data.models.models import Portfolio
 from typing import Dict
 from numpy import array
+import torch
 
+torch.set_default_dtype(torch.float32)
+torch.set_default_device(torch.accelerator.current_accelerator())
 @dataclass
 class FactorRisk:
     portfolio_var : float
@@ -18,7 +21,6 @@ class FactorRiskCalculator:
     def __init__(self,factor_cov:DataFrame):
         self.factor_cov_df=factor_cov
         self.C = self.factor_cov_df.values
-
 
     def calcualte_factor_risk(self,portfolio:Portfolio):
         if portfolio.factor_matrix is None:
