@@ -17,6 +17,7 @@ class PortfolioEnricher13F(DataEnricher[Portfolio]):
             port_positions = {p.ticker:p for p in positions if str(p.cik) == str(cik)}
             if len(port_positions) > 0:
                 portfolio.positions = port_positions
+
         return portfolios
 
 class PortfolioTSMatrixEnricher(DataEnricher[Portfolio]):
@@ -56,8 +57,15 @@ class PortfolioFactorMatrixEnricher(DataEnricher[Portfolio]):
         for port in portfolios:
             tickers = port.positions.keys()
             df = DataFrame(index=tickers,columns=factor_model.columns)
+            cols = df.columns
             df.fillna(0.0,inplace=True)
             common_index = df.index.intersection(factor_model.index)
-            df.loc[common_index,:] = factor_model.loc[common_index,:]
+            df.loc[common_index,cols] = factor_model.loc[common_index,cols]
+            if 'Residual_Std_Err' in df.columns:
+                df.drop(columns='Residual_Std_Err',inplace=True)
+            if 'Alpha' in df.columns:
+                df.drop(columns='Alpha', inplace=True)
             port.factor_matrix = df
+
+
         return portfolios

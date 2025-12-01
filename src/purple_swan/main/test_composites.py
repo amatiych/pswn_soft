@@ -64,6 +64,15 @@ def main():
 
     weights = [port_data.positions[ticker].weight for ticker in tickers]
     ts = ts[tickers]
+    from pandas import read_csv
+    CV = read_csv( "s3://pswn-test/market_data/factors/ff/ff_covariance.csv")
+    CV.set_index(CV.columns[0], inplace=True)
+    from purple_swan.analytics.factor_risk.factor_risk_calculator import FactorRisk,FactorRiskCalculator
+    fcalc = FactorRiskCalculator(CV)
+    frisk = fcalc.calcualte_factor_risk(port_data)
+    print("Factor Risk Attribution")
+    print(frisk.marginal_risk)
+
 
     # print(ts.head())
     # print(ts.dropna().head())
@@ -82,15 +91,15 @@ def main():
     print("calculatikng var")
     var = run_var()[0].__dict__
 
-    from purple_swan.llm.var_explain import analyze_var_profile,generate_daily_risk_report,query_var_results
-    from purple_swan.llm.trade_recommendations_agent import get_trade_recommendations
-
-
-    analysis = analyze_var_profile(var, portfolio=port_data)
-    print(analysis)
-
-    trades = get_trade_recommendations(analysis,tickers)
-    print(trades)
+    # from purple_swan.llm.var_explain import analyze_var_profile,generate_daily_risk_report,query_var_results
+    # from purple_swan.llm.trade_recommendations_agent import get_trade_recommendations
+    #
+    #
+    # analysis = analyze_var_profile(var, portfolio=port_data)
+    # print(analysis)
+    #
+    # trades = get_trade_recommendations(analysis,tickers)
+    # print(trades)
 
     # print("NEW PORTFOLIO")
     # analysis = analyze_var_profile(var2, tickers)
